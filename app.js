@@ -1,3 +1,4 @@
+const APP_VERSION = 'v1.2.0';
 const STORAGE_KEY = 'salary-expense-manager-v2';
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -48,7 +49,8 @@ const dom = {
   saveDataBtn: document.getElementById('saveDataBtn'),
   resetDataBtn: document.getElementById('resetDataBtn'),
   exportExcelBtn: document.getElementById('exportExcelBtn'),
-  exportPdfBtn: document.getElementById('exportPdfBtn')
+  exportPdfBtn: document.getElementById('exportPdfBtn'),
+  appVersionLabel: document.getElementById('appVersionLabel')
 };
 
 let pieChart;
@@ -344,7 +346,7 @@ function exportExcel() {
     'Yearly Amount': Array.from({ length: 12 }, (_, i) => (monthIncluded(exp, i + 1) ? exp.monthlyAmount : 0)).reduce((a, b) => a + b, 0)
   }));
 
-  rows.push({}, { 'Expense Name': 'Yearly Salary', 'Yearly Amount': totals.yearlySalary }, { 'Expense Name': 'Total Yearly Expenses', 'Yearly Amount': totals.totalYearlyExpenses }, { 'Expense Name': 'Net Yearly Balance', 'Yearly Amount': totals.yearlySalary - totals.totalYearlyExpenses });
+  rows.push({}, { 'Expense Name': 'App Version', 'Yearly Amount': APP_VERSION }, { 'Expense Name': 'Yearly Salary', 'Yearly Amount': totals.yearlySalary }, { 'Expense Name': 'Total Yearly Expenses', 'Yearly Amount': totals.totalYearlyExpenses }, { 'Expense Name': 'Net Yearly Balance', 'Yearly Amount': totals.yearlySalary - totals.totalYearlyExpenses });
 
   const ws = XLSX.utils.json_to_sheet(rows);
   const wb = XLSX.utils.book_new();
@@ -360,6 +362,7 @@ function exportPdf() {
   doc.setFontSize(16);
   doc.text('Salary & Expense Summary', 14, 18);
   doc.setFontSize(11);
+  doc.text(`App Version: ${APP_VERSION}`, 14, 24);
   doc.text(`Selected Month: ${MONTHS[state.selectedMonth - 1]}`, 14, 30);
   doc.text(`Selected Month Salary: ${toCurrency(totals.monthlySalary)}`, 14, 38);
   doc.text(`Yearly Salary: ${toCurrency(totals.yearlySalary)}`, 14, 46);
@@ -386,6 +389,7 @@ function init() {
   bindEvents();
 
   dom.viewToggle.value = state.view;
+  dom.appVersionLabel.textContent = `Version: ${APP_VERSION}`;
   dom.plannedSavings.value = state.plannedSavings;
   dom.actualSavings.value = state.actualSavings;
 
