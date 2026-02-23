@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Salary & Expense Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="container">
+    <header class="header card">
+      <div>
+        <h1>Salary & Expense Management</h1>
+        <p class="subtitle">Track salary, spending, and savings with live analytics.</p>
+      </div>
+      <button id="exportExcelBtn" class="btn secondary">Export Excel</button>
+    </header>
+
+    <section class="grid two-col">
+      <div class="card">
+        <h2>Salary Input</h2>
+        <div class="field-row">
+          <label for="viewToggle">View</label>
+          <select id="viewToggle">
+            <option value="monthly">Monthly</option>
+            <option value="yearly">Yearly</option>
+          </select>
+        </div>
+
+        <div class="field-row">
+          <label for="salaryInput">Salary Credited Amount</label>
+          <input id="salaryInput" type="number" min="0" step="0.01" placeholder="Enter amount" />
+        </div>
+
+        <div class="stats-inline">
+          <div>
+            <span>Monthly Salary</span>
+            <strong id="monthlySalaryDisplay">₹0.00</strong>
+          </div>
+          <div>
+            <span>Yearly Salary</span>
+            <strong id="yearlySalaryDisplay">₹0.00</strong>
+          </div>
+        </div>
+        <p id="salaryError" class="error"></p>
+      </div>
+
+      <div class="card">
+        <h2>Savings</h2>
+        <div class="field-row">
+          <label for="plannedSavings">Planned Monthly Savings</label>
+          <input id="plannedSavings" type="number" min="0" step="0.01" placeholder="e.g. 15000" />
+        </div>
+
+        <div class="field-row">
+          <label for="actualSavings">Actual Monthly Savings</label>
+          <input id="actualSavings" type="number" min="0" step="0.01" placeholder="e.g. 12000" />
+        </div>
+
+        <div class="stats-inline">
+          <div>
+            <span>Planned Yearly Savings</span>
+            <strong id="plannedYearlyDisplay">₹0.00</strong>
+          </div>
+          <div>
+            <span>Actual Yearly Savings</span>
+            <strong id="actualYearlyDisplay">₹0.00</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Expenses</h2>
+        <button id="addExpenseBtn" class="btn">+ Add Expense</button>
+      </div>
+      <p class="hint">For loans/EMIs, select custom payable months (e.g. [1,2,3,4]).</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Expense Name</th>
+              <th>Monthly Amount</th>
+              <th>Months Payable</th>
+              <th>Loan/EMI?</th>
+              <th>Selected Months</th>
+              <th>Monthly %</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="expenseTableBody"></tbody>
+        </table>
+      </div>
+      <p id="expenseError" class="error"></p>
+    </section>
+
+    <section class="grid three-col">
+      <article class="card highlight">
+        <h3>Total Credited Salary</h3>
+        <p id="totalSalary">₹0.00</p>
+      </article>
+      <article class="card highlight">
+        <h3>Total Expenses</h3>
+        <p id="totalExpenses">₹0.00</p>
+      </article>
+      <article class="card highlight">
+        <h3>Net Savings / Deficit</h3>
+        <p id="netBalance">₹0.00</p>
+      </article>
+    </section>
+
+    <section class="alerts">
+      <p id="overspendAlert" class="alert hidden">⚠️ Expenses exceed salary. Please review your budget.</p>
+    </section>
+
+    <section class="grid two-col charts">
+      <div class="card">
+        <h2>Expense Breakdown</h2>
+        <canvas id="expensePie"></canvas>
+      </div>
+      <div class="card">
+        <h2>Monthly Salary vs Expenses</h2>
+        <canvas id="salaryExpenseTrend"></canvas>
+      </div>
+    </section>
+
+    <section class="card actions">
+      <button id="exportPdfBtn" class="btn secondary">Export PDF Summary</button>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
