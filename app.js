@@ -335,23 +335,63 @@ function bindEvents() {
 
 function exportExcel() {
   const totals = getTotals();
-  const rows = state.expenses.map((exp) => ({
-    'Expense Name': exp.name,
-    Type: exp.type,
-    'Monthly Amount': exp.monthlyAmount,
-    'Apply Mode': exp.applyMode,
-    'Months Count': exp.monthsPayable,
-    'Custom Months': exp.customMonths.join(','),
-    Notes: exp.notes,
-    'Yearly Amount': Array.from({ length: 12 }, (_, i) => (monthIncluded(exp, i + 1) ? exp.monthlyAmount : 0)).reduce((a, b) => a + b, 0)
-  }));
 
-  rows.push({}, { 'Expense Name': 'App Version', 'Yearly Amount': APP_VERSION }, { 'Expense Name': 'Yearly Salary', 'Yearly Amount': totals.yearlySalary }, { 'Expense Name': 'Total Yearly Expenses', 'Yearly Amount': totals.totalYearlyExpenses }, { 'Expense Name': 'Net Yearly Balance', 'Yearly Amount': totals.yearlySalary - totals.totalYearlyExpenses });
+  const summaryRows = [
+    { Metric: 'App Version', Value: APP_VERSION },
+    { Metric: 'View Mode', Value: state.view },
+    { Metric: 'Selected Month', Value: MONTHS[state.selectedMonth - 1] },
+    { Metric: 'Selected Month Salary', Value: totals.monthlySalary },
+    { Metric: 'Selected Month Expense', Value: totals.selectedMonthExpense },
+    { Metric: 'Selected Month Balance', Value: totals.monthlySalary - totals.selectedMonthExpense },
+    { Metric: 'Yearly Salary', Value: totals.yearlySalary },
+    { Metric: 'Total Yearly Expenses', Value: totals.totalYearlyExpenses },
+    { Metric: 'Net Yearly Balance', Value: totals.yearlySalary - totals.totalYearlyExpenses },
+    { Metric: 'Planned Yearly Savings', Value: state.plannedSavings * 12 },
+    { Metric: 'Actual Yearly Savings', Value: state.actualSavings * 12 }
+  ];
 
-  const ws = XLSX.utils.json_to_sheet(rows);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Summary');
-  XLSX.writeFile(wb, 'salary-expense-summary.xlsx');
+  const monthlyRows = MONTHS.map((month, index) => {
+    const monthNumber = index + 1;
+    const salary = state.monthlySalaries[index] || 0;
+    const expense = getMonthExpense(monthNumber);
+
+    return {
+      Month: month,
+      Salary: salary,
+      Expense: expense,
+      Balance: salary - expense
+    };
+  });
+
+  const expenseRows = state.expenses.map((exp) => {
+    const row = {
+      'Expense Name': exp.name,
+      Type: exp.type,
+      'Monthly Amount': exp.monthlyAmount,
+      'Apply Mode': exp.applyMode,
+      'Months Count': exp.monthsPayable,
+      'Custom Months': exp.customMonths.join(','),
+      Notes: exp.notes || '',
+      'Yearly Amount': Array.from({ length: 12 }, (_, i) => (monthIncluded(exp, i + 1) ? exp.monthlyAmount : 0)).reduce((a, b) => a + b, 0)
+    };
+
+    MONTHS.forEach((month, i) => {
+      row[month] = monthIncluded(exp, i + 1) ? exp.monthlyAmount : 0;
+    });
+
+    return row;
+  });
+
+  const summarySheet = XLSX.utils.json_to_sheet(summaryRows);
+  const monthlySheet = XLSX.utils.json_to_sheet(monthlyRows);
+  const expenseSheet = XLSX.utils.json_to_sheet(expenseRows);
+
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, summarySheet, 'Website Summary');
+  XLSX.utils.book_append_sheet(workbook, monthlySheet, 'Monthly View');
+  XLSX.utils.book_append_sheet(workbook, expenseSheet, 'Expense Matrix');
+
+  XLSX.writeFile(workbook, 'salary-expense-summary.xlsx');
 }
 
 function exportPdf() {
