@@ -1,0 +1,18 @@
+import "dotenv/config";
+import express from "express";
+import cors from "cors";
+import morgan from "morgan";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import { connectDB } from "./config/db.js";
+import routes from "./routes/index.js";
+import { startReminderJobs } from "./services/reminderService.js";
+const app=express();
+app.use(helmet());
+app.use(cors({origin:process.env.FRONTEND_URL}));
+app.use(express.json({limit:"2mb"}));
+app.use(morgan("dev"));
+app.use(rateLimit({windowMs:15*60*1000,max:200}));
+app.use("/api",routes);
+const port=process.env.PORT||5000;
+connectDB().then(()=>{ startReminderJobs(); app.listen(port,()=>console.log(`Backend on ${port}`)); });
